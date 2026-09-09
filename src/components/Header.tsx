@@ -6,7 +6,7 @@ function Header() {
     return (
         <header className="header">
             <div className="header-container">
-                <h1 className="header-title">TaskHub</h1>
+                <Link to="/" className="header-title">TaskHub</Link>
                 <ThemeToggle />
             </div>
             <nav className="header-nav">

@@ -14,7 +14,10 @@
 
 .header-title {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 28px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .header-nav {

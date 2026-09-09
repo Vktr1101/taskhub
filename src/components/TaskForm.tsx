@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useState} from "react";
 import "./styles/TaskForm.css";
+
+interface Task {
+    titlu: string;
+    descriere: string;
+    prioritate: string;
+    categorie: string;
+    deadline: string;
+    ora: string;
+}
 
 function TaskForm() {
     const [titlu, setTitlu] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [descriere, setDescriere] = useState('');
     const [prioritate, setPrioritate] = useState<'' | 'none' | 'low' | 'medium' | 'high' | 'urgent'>('');
     const [categorie, setCategorie] = useState <'' | 'work' | 'personal' | 'study'>('');
+    const [descriere, setDescriere] = useState('');
     const [ora, setOra] = useState('');
 
     const [erori, setErori] = useState<string[]>([]);
     const [mesaj, setMesaj] = useState('');
+
+    const [taskuri, setTaskuri] = useState<Task[]>([]);
 
     const acum = new Date();
     const aziLocal = `${acum.getFullYear()}-${String(acum.getMonth() + 1).padStart(2, '0')}-${String(acum.getDate()).padStart(2, '0')}`;
@@ -76,6 +87,9 @@ function TaskForm() {
             text += `${ore} ${ore === 1 ? 'hour' : 'hours'} and ${minute} ${minute === 1 ? 'minutes' : 'minute'}`;
         }
         text += ` to complete it!\nCreate another task!`;
+
+        const nou: Task = { titlu, descriere, prioritate, categorie, deadline, ora };
+        setTaskuri([...taskuri, nou]);
 
         setMesaj(text);
         setTitlu('');
@@ -173,6 +187,23 @@ function TaskForm() {
                 <button className="task-save" onClick={salveazaTask}>Save</button>
                 <button className="task-cancel" onClick={cancelTask}>Cancel</button>
             </div>
+
+            <div className="task-list">
+                {taskuri.map((task, i) => (
+                    <div key={i} className="task-card">
+                        <h1 className="task-title">{task.titlu}</h1>
+                        <br/>
+                        <p className="task-description">{task.descriere}</p>
+                        <div className="task-container">
+                            <span>Priority: {task.prioritate.toLocaleUpperCase()}</span>
+                            <span>Category: {task.categorie.toLocaleUpperCase()}</span>
+                            <span>Deadline: {task.deadline} {task.ora}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <h1 className="title">To save all your tasks login or register!</h1>
         </div>
     );
 }
