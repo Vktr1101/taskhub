@@ -1,5 +1,7 @@
-import { useState} from "react";
+import { useState } from "react";
 import "./styles/TaskForm.css";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext.tsx";
 
 interface Task {
     titlu: string;
@@ -22,6 +24,7 @@ function TaskForm() {
     const [mesaj, setMesaj] = useState('');
 
     const [taskuri, setTaskuri] = useState<Task[]>([]);
+    const { user } = useContext(UserContext);
 
     const acum = new Date();
     const aziLocal = `${acum.getFullYear()}-${String(acum.getMonth() + 1).padStart(2, '0')}-${String(acum.getDate()).padStart(2, '0')}`;
@@ -44,9 +47,8 @@ function TaskForm() {
         return ore;
     }
 
-    function salveazaTask() {
+    async function salveazaTask() {
         const campuriGoale: string[] = [];
-
         if (titlu.trim() === '') campuriGoale.push('titlu');
         if (descriere.trim() === '') campuriGoale.push('descriere');
         if (prioritate === '') campuriGoale.push('prioritate');
@@ -55,7 +57,6 @@ function TaskForm() {
         if (ora === '') campuriGoale.push('ora');
 
         setErori(campuriGoale);
-
         if (campuriGoale.length > 0) {
             setMesaj('All fields are mandatory!');
             return;
@@ -63,12 +64,31 @@ function TaskForm() {
 
         const deadlineComplet = new Date(`${deadline}T${ora}`);
         const acum = new Date();
+        if (deadlineComplet.getTime() <= acum.getTime()) {
+            setErori(['deadline', 'ora']);
+            setMesaj('The deadline must be in the future!');
+            return;
+        }
 
-        // if (deadlineComplet.getTime() <= acum.getTime()) {
-        //     setErori(['deadline', 'ora']);
-        //     setMesaj('The deadline must be in the future!');
-        //     return;
-        // }
+        const nouTask = {
+            titlu, descriere, prioritate, categorie, deadline, ora
+        };
+
+        if (user) {
+            const raspuns = await fetch('http://localhost:3000/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nouTask)
+            });
+            const date = await raspuns.json();
+
+            if (!date.succes) {
+                setMesaj('Error: Could not save task!');
+                return;
+            }
+        } else {
+            setTaskuri([...taskuri, nouTask]);
+        }
 
         const diff = deadlineComplet.getTime() - acum.getTime();
         const minuteTotale = Math.floor(diff / 1000 / 60);
@@ -76,20 +96,14 @@ function TaskForm() {
         const ore = Math.floor((minuteTotale % (60 * 24)) / 60);
         const minute = minuteTotale % 60;
 
-        let text: string = 'Task created! You have ';
-
+        let text = 'Task created! You have ';
         if (zile > 0) {
             text += `${zile} ${zile === 1 ? 'day' : 'days'}`;
-            if (ore > 0) {
-                text += ` and ${ore} ${ore === 1 ? 'hour' : 'hours'}`;
-            }
+            if (ore > 0) text += ` and ${ore} ${ore === 1 ? 'hour' : 'hours'}`;
         } else {
-            text += `${ore} ${ore === 1 ? 'hour' : 'hours'} and ${minute} ${minute === 1 ? 'minutes' : 'minute'}`;
+            text += `${ore} ${ore === 1 ? 'hour' : 'hours'} and ${minute} ${minute === 1 ? 'minute' : 'minutes'}`;
         }
         text += ` to complete it!\nCreate another task!`;
-
-        const nou: Task = { titlu, descriere, prioritate, categorie, deadline, ora };
-        setTaskuri([...taskuri, nou]);
 
         setMesaj(text);
         setTitlu('');
