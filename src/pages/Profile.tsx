@@ -1,5 +1,11 @@
+import Header from "../components/Header.tsx";
+
 function Profile() {
-    return <div>Profile</div>;
+    return (
+        <div>
+            <Header />
+        </div>
+    );
 }
 
 export default Profile;

@@ -1,12 +1,11 @@
-import { useState } from "react";
 import "./styles/Form.css";
 
-function LoginForm() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [parola, setParola] = useState('');
-    const [confirmare, setConfirmare] = useState('');
+interface LoginProps {
+    username: string; setUsername: (v: string) => void;
+    parola: string; setParola: (v: string) => void;
+}
 
+function LoginForm({ username, setUsername, parola, setParola }: LoginProps) {
     return (
         <div className="form">
             <input
@@ -17,24 +16,10 @@ function LoginForm() {
             />
 
             <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <input
                 type="text"
                 placeholder="Password"
                 value={parola}
                 onChange={(e) => setParola(e.target.value)}
-            />
-
-            <input
-                type="text"
-                placeholder="Confirm password"
-                value={confirmare}
-                onChange={(e) => setConfirmare(e.target.value)}
             />
         </div>
     );

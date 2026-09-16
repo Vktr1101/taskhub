@@ -1,5 +1,11 @@
+import Header from "../components/Header.tsx";
+
 function Tasks() {
-    return <div>Tasks</div>;
+    return (
+        <div>
+            <Header />
+        </div>
+    );
 }
 
 export default Tasks;

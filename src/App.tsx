@@ -3,6 +3,7 @@ import TaskHub from "./pages/TaskHub.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import Tasks from "./pages/Tasks.tsx";
+import Profile from "./pages/Profile.tsx";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/login" element={<Login />}></Route>
                 <Route path="/register" element={<Register />}></Route>
                 <Route path="/tasks" element={<Tasks />}></Route>
+                <Route path="/profile" element={<Profile />}></Route>
             </Routes>
         </BrowserRouter>
     );

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { UserContext } from "./UserContext.tsx";
 
 interface User {
@@ -11,6 +11,19 @@ interface UserProviderType {
 
 function UserProvider({ children }: UserProviderType) {
     const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        async function verificaLogin() {
+            const raspuns = await fetch('http://localhost:3000/api/me', {
+                credentials: 'include'
+            });
+            const date = await raspuns.json();
+            if (date.loggedIn) {
+                setUser(date.user);
+            }
+        }
+        verificaLogin();
+    }, []);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>
