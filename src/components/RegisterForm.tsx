@@ -1,5 +1,3 @@
-import "./styles/Form.css";
-
 interface RegisterProps {
     username: string; setUsername: (v: string) => void;
     email: string; setEmail: (v: string) => void;

@@ -30,8 +30,8 @@ function Register() {
         const date = await raspuns.json();
 
         if (date.succes) {
-            setUser({ username });
-            navigate('/');
+            setUser(date.user);
+            navigate('/profile');
         } else {
             alert(date.error);
         }

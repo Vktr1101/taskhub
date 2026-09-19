@@ -1,5 +1,3 @@
-import "./styles/Button.css"
-
 interface ButtonProps {
     text: string;
     onClick: () => void;

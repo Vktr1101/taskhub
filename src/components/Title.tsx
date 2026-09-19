@@ -1,5 +1,3 @@
-import "./styles/Title.css";
-
 interface TitleProps {
     text: string;
 }

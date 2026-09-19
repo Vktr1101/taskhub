@@ -1,5 +1,3 @@
-import "./styles/Form.css";
-
 interface LoginProps {
     username: string; setUsername: (v: string) => void;
     parola: string; setParola: (v: string) => void;
@@ -16,7 +14,7 @@ function LoginForm({ username, setUsername, parola, setParola }: LoginProps) {
             />
 
             <input
-                type="text"
+                type="password"
                 placeholder="Password"
                 value={parola}
                 onChange={(e) => setParola(e.target.value)}

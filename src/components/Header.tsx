@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import "./styles/Header.css";
 import ThemeToggle from "../components/ThemeToggle.tsx";
 import { UserContext } from "../context/UserContext.tsx";
 
@@ -15,7 +14,7 @@ function Header() {
             </div>
             <nav className="header-nav">
                 {user ? (
-                    <Link to="/profile" className="username-link">
+                    <Link to="/profile">
                         <i className="fa-solid fa-circle-user"></i>&nbsp;{user.username}
                     </Link>
                 ) : (

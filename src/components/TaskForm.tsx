@@ -1,6 +1,4 @@
-import { useState } from "react";
-import "./styles/TaskForm.css";
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { UserContext } from "../context/UserContext.tsx";
 
 interface Task {
@@ -16,7 +14,7 @@ function TaskForm() {
     const [titlu, setTitlu] = useState('');
     const [deadline, setDeadline] = useState('');
     const [prioritate, setPrioritate] = useState<'' | 'none' | 'low' | 'medium' | 'high' | 'urgent'>('');
-    const [categorie, setCategorie] = useState <'' | 'work' | 'personal' | 'study'>('');
+    const [categorie, setCategorie] = useState <'' | 'work' | 'personal' | 'study' | 'other'>('');
     const [descriere, setDescriere] = useState('');
     const [ora, setOra] = useState('');
 
@@ -78,6 +76,7 @@ function TaskForm() {
             const raspuns = await fetch('http://localhost:3000/api/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(nouTask)
             });
             const date = await raspuns.json();
@@ -99,9 +98,16 @@ function TaskForm() {
         let text = 'Task created! You have ';
         if (zile > 0) {
             text += `${zile} ${zile === 1 ? 'day' : 'days'}`;
-            if (ore > 0) text += ` and ${ore} ${ore === 1 ? 'hour' : 'hours'}`;
-        } else {
-            text += `${ore} ${ore === 1 ? 'hour' : 'hours'} and ${minute} ${minute === 1 ? 'minute' : 'minutes'}`;
+            if (ore > 0) {
+                text += ` and ${ore} ${ore === 1 ? 'hour' : 'hours'}`;
+            }
+        } else if (zile <= 0 && ore > 0) {
+            text += `${ore} ${ore === 1 ? 'hour' : 'hours'}`;
+            if (minute > 0) {
+                text += ` and ${minute} ${minute === 1 ? 'minute' : 'minutes'}`;
+            }
+        } else if (zile <= 0 && ore <= 0) {
+            text += `${minute} ${minute === 1 ? 'minute' : 'minutes'}`;
         }
         text += ` to complete it!\nCreate another task!`;
 
@@ -164,17 +170,18 @@ function TaskForm() {
                         className={erori.includes('categorie') ? 'eroare' : ''}
                         value={categorie}
                         onChange={(e) =>
-                            setCategorie(e.target.value as 'work' | 'personal' | 'study')}>
+                            setCategorie(e.target.value as 'work' | 'personal' | 'study' | 'other')}>
                         <option value="" disabled>Category</option>
                         <option value="work">Work</option>
                         <option value="personal">Personal</option>
                         <option value="study">Study</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
                 <br/>
 
                 <div>
-                    <p>Deadline:</p>
+                    <p className="ddl">Deadline:</p>
                     <div className="task-deadline">
                         <input
                             className={erori.includes('deadline') ? 'input-date eroare' : 'input-date'}
@@ -207,7 +214,13 @@ function TaskForm() {
                     <div key={i} className="task-card">
                         <h1 className="task-title">{task.titlu}</h1>
                         <br/>
-                        <p className="task-description">{task.descriere}</p>
+
+                        <div className="task-description">
+                            <p>Description: </p>
+                            <p>{task.descriere}</p>
+                        </div>
+                        <br/>
+
                         <div className="task-container">
                             <span>Priority: {task.prioritate.toLocaleUpperCase()}</span>
                             <span>Category: {task.categorie.toLocaleUpperCase()}</span>
@@ -217,7 +230,11 @@ function TaskForm() {
                 ))}
             </div>
 
-            <h1 className="title">To save all your tasks login or register!</h1>
+            {user ? (
+                <h1 className="title">You can view all of your tasks on your personal profile page!</h1>
+            ) : (
+                <h1 className="title">To save all your tasks login or register!</h1>
+            )}
         </div>
     );
 }

@@ -25,6 +25,10 @@ const Task = sequelize.define('Task', {
     ora: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     tableName: 'tasks',

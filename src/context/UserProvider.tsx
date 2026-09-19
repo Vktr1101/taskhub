@@ -3,6 +3,7 @@ import { UserContext } from "./UserContext.tsx";
 
 interface User {
     username: string;
+    email: string;
 }
 
 interface UserProviderType {
