@@ -47,6 +47,7 @@ function Register() {
                 parola={parola} setParola={setParola}
                 confirmare={confirmare} setConfirmare={setConfirmare}
             />
+            <br/>
             <Button text="Create account" onClick={handleRegister} />
         </div>
     );

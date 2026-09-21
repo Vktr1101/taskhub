@@ -132,6 +132,21 @@ function TaskForm() {
         setErori([]);
     }
 
+    function timeLeft(deadline: string, ora: string): string {
+        const deadlineComplet = new Date(`${deadline}T${ora}`);
+        const acum = new Date();
+        const diff = deadlineComplet.getTime() - acum.getTime();
+        if (diff <= 0) return 'Expired';
+
+        const ore = diff / 1000 / 60 / 60;
+        const zile = ore / 24;
+
+        if (ore <= 24) return '24 hours or less';
+        if (zile <= 3) return '3 days or less';
+        if (zile <= 7) return '1 week or less';
+        return 'More than 1 week';
+    }
+
     return (
         <div>
             <h1 className="title">{mesaj ? mesaj : "Create a task for later!"}</h1>
@@ -225,6 +240,7 @@ function TaskForm() {
                             <span>Priority: {task.prioritate.toLocaleUpperCase()}</span>
                             <span>Category: {task.categorie.toLocaleUpperCase()}</span>
                             <span>Deadline: {task.deadline} {task.ora}</span>
+                            <span>Time left: {timeLeft(task.deadline, task.ora)}</span>
                         </div>
                     </div>
                 ))}

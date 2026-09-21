@@ -16,6 +16,8 @@ function Tasks() {
     const [taskuri, setTaskuri] = useState<Task[]>([]);
     const { user } = useContext(UserContext);
 
+    const [taskSelectat, setTaskSelectat] = useState<Task | null>(null);
+
     useEffect(() => {
         async function incarcaTaskuri() {
             const raspuns = await fetch('http://localhost:3000/api/tasks', {
@@ -29,6 +31,25 @@ function Tasks() {
         incarcaTaskuri();
     }, []);
 
+    function timeLeft(deadline: string, ora: string): string {
+        const deadlineComplet = new Date(`${deadline}T${ora}`);
+        const acum = new Date();
+        const diff = deadlineComplet.getTime() - acum.getTime();
+        if (diff <= 0) return 'Expired';
+
+        const ore = diff / 1000 / 60 / 60;
+        const zile = ore / 24;
+
+        if (ore <= 24) return '24 hours or less';
+        if (zile <= 3) return '3 days or less';
+        if (zile <= 7) return '1 week or less';
+        return 'More than 1 week';
+    }
+
+    function getStatus(deadline: string, ora: string): string {
+        return timeLeft(deadline, ora) === 'Expired' ? '• Inactive' : '• Active';
+    }
+
     return (
         <div>
             <Header />
@@ -37,26 +58,40 @@ function Tasks() {
             {taskuri.length ? (
                 <div className="task-list">
                     {taskuri.map((task, i) => (
-                        <div key={i} className="task-card">
-                            <h1 className="task-title">{task.titlu}</h1>
-                            <br/>
-
-                            <div className="task-description">
-                                <p>Description:</p>
-                                <p>{task.descriere}</p>
+                        <button key={i} className="task-details" onClick={() => {
+                            setTaskSelectat(task);
+                        }}>
+                            <span>{task.titlu}</span>
+                            <div className="task-status">
+                                <p className={getStatus(task.deadline, task.ora) === '• Active' ? "status-active" : "status-inactive"}>
+                                    {getStatus(task.deadline, task.ora)}
+                                </p>
+                                <p>Time left: {timeLeft(task.deadline, task.ora)}</p>
                             </div>
-                            <br/>
-
-                            <div className="task-container">
-                                <span>Priority: {task.prioritate.toLocaleUpperCase()}</span>
-                                <span>Category: {task.categorie.toLocaleUpperCase()}</span>
-                                <span>Deadline: {task.deadline} {task.ora}</span>
-                            </div>
-                        </div>
+                        </button>
                     ))}
                 </div>
             ) : (
                 <h1>No tasks created!</h1>
+            )}
+
+            {taskSelectat && (
+                <div className="modal-overlay" onClick={() => setTaskSelectat(null)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <h1 className="task-title">{taskSelectat.titlu}</h1>
+                        <div className="task-description">
+                            <p>Description:</p>
+                            <p>{taskSelectat.descriere}</p>
+                        </div>
+                        <div className="task-container">
+                            <span>Priority: {taskSelectat.prioritate.toUpperCase()}</span>
+                            <span>Category: {taskSelectat.categorie.toUpperCase()}</span>
+                            <span>Deadline: {taskSelectat.deadline} {taskSelectat.ora}</span>
+                            <span>Time left: {timeLeft(taskSelectat.deadline, taskSelectat.ora)}</span>
+                            <span>Status: {getStatus(taskSelectat.deadline, taskSelectat.ora)}</span>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

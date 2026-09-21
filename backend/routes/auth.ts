@@ -78,6 +78,30 @@ router.post('/logout', (req, res) => {
     });
 });
 
+router.patch('/update-username', async (req, res) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionUser = (req.session as any).user;
+    if (!sessionUser) {
+        return res.status(401).json({ succes: false, error: 'Nu sunteti logat!' });
+    }
+
+    const { username } = req.body;
+    if (!username || username.trim() === '') {
+        return res.status(400).json({ succes: false, error: 'Username-ul nu poate fi gol!' });
+    }
+
+    try {
+        await User.update({ username }, { where: { id: sessionUser.id } });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (req.session as any).user.username = username;
+        res.json({ succes: true, username });
+    } catch (error) {
+        console.error('Eroare la update username:', error);
+        res.status(400).json({ succes: false, error: 'Username deja folosit' });
+    }
+});
+
 router.delete('/delete-account', async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sessionUser = (req.session as any).user;
