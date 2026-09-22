@@ -1,16 +1,23 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext.tsx";
 
 interface Task {
+    id?: number;
     titlu: string;
     descriere: string;
     prioritate: string;
     categorie: string;
     deadline: string;
     ora: string;
+    status?: string;
 }
 
-function TaskForm() {
+interface TaskFormProps {
+    taskDeEditat?: Task | null;
+    onClose?: () => void;
+}
+
+function TaskForm({ taskDeEditat, onClose }: TaskFormProps) {
     const [titlu, setTitlu] = useState('');
     const [deadline, setDeadline] = useState('');
     const [prioritate, setPrioritate] = useState<'' | 'none' | 'low' | 'medium' | 'high' | 'urgent'>('');
@@ -45,6 +52,18 @@ function TaskForm() {
         return ore;
     }
 
+    useEffect(() => {
+        if (taskDeEditat) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setTitlu(taskDeEditat.titlu);
+            setDescriere(taskDeEditat.descriere);
+            setPrioritate(taskDeEditat.prioritate as typeof prioritate);
+            setCategorie(taskDeEditat.categorie as typeof categorie);
+            setDeadline(taskDeEditat.deadline);
+            setOra(taskDeEditat.ora);
+        }
+    }, [taskDeEditat]);
+
     async function salveazaTask() {
         const campuriGoale: string[] = [];
         if (titlu.trim() === '') campuriGoale.push('titlu');
@@ -72,7 +91,21 @@ function TaskForm() {
             titlu, descriere, prioritate, categorie, deadline, ora
         };
 
-        if (user) {
+        if (taskDeEditat) {
+            const raspuns = await fetch(`http://localhost:3000/api/tasks/${taskDeEditat.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(nouTask)
+            });
+            const date = await raspuns.json();
+            if (!date.succes) {
+                setMesaj('Task wasn\'t modified!');
+                return;
+            }
+            if (onClose) onClose();
+            return;
+        } else if (user) {
             const raspuns = await fetch('http://localhost:3000/api/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -122,6 +155,11 @@ function TaskForm() {
     }
 
     function cancelTask() {
+        if (taskDeEditat) {
+            onClose?.();
+            return;
+        }
+
         setMesaj('');
         setTitlu('');
         setDescriere('');
@@ -149,7 +187,9 @@ function TaskForm() {
 
     return (
         <div>
-            <h1 className="title">{mesaj ? mesaj : "Create a task for later!"}</h1>
+            <h1 className="title">
+                {mesaj ? mesaj : (taskDeEditat ? "Edit task" : "Create a task for later!")}
+            </h1>
 
             <div className="task-form">
                 <input
@@ -218,6 +258,7 @@ function TaskForm() {
                     </div>
                 </div>
             </div>
+            <br/>
 
             <div className="button-container">
                 <button className="task-save" onClick={salveazaTask}>Save</button>
@@ -243,7 +284,7 @@ function TaskForm() {
                             <span>Time left: {timeLeft(task.deadline, task.ora)}</span>
                         </div>
                     </div>
-                ))}
+                )).reverse()}
             </div>
 
             {user ? (

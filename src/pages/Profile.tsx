@@ -76,7 +76,7 @@ function Profile() {
                     <span>{user?.email}</span>
                 </p>
             </div>
-
+            <br/>
 
             <div className="button-container">
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>

@@ -29,6 +29,11 @@ const Task = sequelize.define('Task', {
     userId: {
         type: DataTypes.INTEGER,
         allowNull: true
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'active'
     }
 }, {
     tableName: 'tasks',

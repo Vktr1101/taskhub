@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../models/user.ts';
-import Task from "../models/task.ts";
+import User from '../models/User.ts';
+import Task from "../models/Task.ts";
 
 const router = Router();
 

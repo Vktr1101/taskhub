@@ -121,6 +121,14 @@
     margin: 0 auto;
 }
 
+.task-list.cu-bara {
+    padding-bottom: 125px;
+}
+
+.task-list:last-child {
+    margin-bottom: 30px;
+}
+
 .task-card {
     max-width: 820px;
     width: 75%;
@@ -168,6 +176,14 @@
 
 .status-inactive {
     color: red;
+}
+
+.status-done {
+    color: darkorange;
+}
+
+.status-canceled {
+    color: sandybrown;
 }
 
 /* ============================================================
@@ -279,11 +295,13 @@
     color: var(--text);
     font-size: 24px;
     font-weight: bold;
-    cursor: pointer;
 }
 
-.task-details:hover {
-    opacity: 0.7;
+.task-checks {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
 .task-status {
@@ -296,4 +314,183 @@
 
 .task-status p {
     margin: 0;
+}
+
+.task-checkbox {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background-color: var(--bg);
+    cursor: pointer;
+    position: relative;
+}
+
+.task-checkbox:checked {
+    background-color: var(--accent);
+}
+
+.task-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+}
+
+/* ============================================================
+   TASK MODAL
+   ============================================================ */
+.task-modal {
+    background-color: var(--card);
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 550px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.task-info-readonly {
+    display: flex;
+    justify-content: space-between;
+    width: 75%;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.task-info-readonly div {
+    background-color: var(--bg);
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    padding: 10px 20px;
+}
+
+.task-info-readonly p {
+    margin: 0;
+}
+
+.task-modal .title {
+    font-size: 28px;
+    margin: 0 0 15px 0;
+}
+
+.task-modal .task-form {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    gap: 12px;
+    align-items: center;
+}
+
+.task-modal .input-bold,
+.task-modal .task-form textarea,
+.task-modal .task-selects,
+.task-modal .task-deadline {
+    width: 85%;
+    max-width: 420px;
+}
+
+.task-modal .input-bold {
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
+}
+
+.task-modal .task-form textarea {
+    font-size: 14px;
+    min-height: 60px;
+    padding: 10px;
+}
+
+.task-modal .task-selects {
+    display: flex;
+    gap: 15px;
+}
+
+.task-modal .task-selects select {
+    flex: 1;
+    width: auto;
+    font-size: 15px;
+    padding: 10px;
+}
+
+.task-modal .task-deadline {
+    display: flex;
+    gap: 15px;
+}
+
+.task-modal .task-deadline input,
+.task-modal .task-deadline select {
+    flex: 1;
+    width: auto;
+    font-size: 14px;
+    padding: 10px;
+}
+
+.task-modal .ddl {
+    font-size: 20px;
+    padding-bottom: 5px;
+}
+
+.task-modal .button-container {
+    margin: 15px 0 0 0;
+}
+
+.task-modal .task-save,
+.task-modal .task-cancel {
+    font-size: 18px;
+    padding: 10px 20px;
+}
+
+.task-modal .task-list,
+.task-modal .task-form ~ .title {
+    display: none;
+}
+
+/* ============================================================
+   ACTION BAR
+   ============================================================ */
+.action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--card);
+    padding: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.action-bar button {
+    padding: 18px 24px;
+    font-size: 20px;
+    font-family: inherit;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--accent);
+    color: white;
+    cursor: pointer;
+}
+
+.action-bar button:last-child {
+    background-color: red;
+}
+
+.action-bar button:hover {
+    opacity: 0.9;
 }
