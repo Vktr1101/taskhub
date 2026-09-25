@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const sessionUser = (req.session as any).user;
 
     if (!sessionUser) {
-        return res.status(401).json({ succes: false, error: 'Nu esti logat' });
+        return res.status(401).json({ succes: false, error: 'Nu sunteti logat!' });
     }
 
     try {
@@ -55,7 +55,7 @@ router.patch('/:id', async (req, res) => {
 
         res.json({ succes: true });
     } catch (error) {
-        console.error('Eroare la update task:', error);
+        console.error('Eroare la update task: ', error);
         res.status(400).json({ succes: false, error: 'Nu s-a putut edita!' });
     }
 });
@@ -69,7 +69,7 @@ router.delete('/:id', async (req, res) => {
         await Task.destroy({ where: { id: req.params.id, userId: sessionUser.id } });
         res.json({ succes: true });
     } catch (error) {
-        console.error('Eroare la delete task:', error);
+        console.error('Eroare la delete task: ', error);
         res.status(400).json({ succes: false, error: 'Nu s-a putut sterge!' });
     }
 });

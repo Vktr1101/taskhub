@@ -94,6 +94,14 @@ function Tasks() {
         }
     }
 
+    function toggleSelectAll() {
+        if (taskuriBifate.length === taskuri.length) {
+            setTaskuriBifate([]);
+        } else {
+            setTaskuriBifate(taskuri.map(task => task.id));
+        }
+    }
+
     async function aplicaActiune(statusNou: string) {
         for (const id of taskuriBifate) {
             await fetch(`http://localhost:3000/api/tasks/${id}`, {
@@ -200,9 +208,25 @@ function Tasks() {
 
             {taskuriBifate.length > 0 && (
                 <div className="action-bar">
-                    <button onClick={() => aplicaActiune('done')}>Mark as Done</button>
-                    <button onClick={() => aplicaActiune('canceled')}>Cancel tasks</button>
-                    <button onClick={handleDeleteTasks}>Delete tasks</button>
+                        <label className="select-all">
+                            <input
+                                type="checkbox"
+                                className="task-checkbox"
+                                checked={taskuriBifate.length === taskuri.length}
+                                onChange={toggleSelectAll}
+                            />
+                            Select all
+                        </label>
+
+                    <div className="action-buttons">
+                        <button onClick={() => aplicaActiune('done')}>Mark as Done</button>
+                        <button onClick={() => aplicaActiune('canceled')}>Cancel tasks</button>
+                        <button onClick={handleDeleteTasks}>Delete tasks</button>
+                    </div>
+
+                    <button className="deselect-btn" onClick={() => setTaskuriBifate([])}>
+                        <i className="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
             )}
         </div>

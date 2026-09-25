@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
+import passport from "../passport.ts";
 import User from '../models/User.ts';
 import Task from "../models/Task.ts";
 
 const router = Router();
 
+// ================ USER AUTH ================
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -97,7 +99,7 @@ router.patch('/update-username', async (req, res) => {
         (req.session as any).user.username = username;
         res.json({ succes: true, username });
     } catch (error) {
-        console.error('Eroare la update username:', error);
+        console.error('Eroare la update username: ', error);
         res.status(400).json({ succes: false, error: 'Username deja folosit' });
     }
 });
@@ -118,8 +120,42 @@ router.delete('/delete-account', async (req, res) => {
             res.json({ succes: true });
         });
     } catch (error) {
-        console.error('Eroare la stergere:', error);
+        console.error('Eroare la stergere: ', error);
         res.status(400).json({ succes: false, error: 'Nu s-a putut sterge contul' });
+    }
+});
+
+// ================ ADMIN AUTH VIA GOOGLE OAUTH2 ================
+router.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+router.get('/auth/google/callback',
+    passport.authenticate('google', {
+        failureRedirect: 'http://localhost:5173/admin',
+        // session: true
+    }),
+    (req, res) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const user = req.user as any;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (req.session as any).user = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            admin: user.admin
+        };
+        res.redirect('http://localhost:5173/admin');
+    }
+);
+
+router.post('/admin-password', (req, res) => {
+    const { password } = req.body;
+    if (password === process.env.ADMIN_PASSWORD) {
+        res.json({ succes: true });
+    } else {
+        res.json({ succes: false });
     }
 });
 

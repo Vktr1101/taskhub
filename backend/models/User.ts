@@ -12,9 +12,27 @@ const User = sequelize.define('User', {
         allowNull: false,
         unique: true
     },
+    googleId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     parola: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
+    },
+    admin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    banned: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    banReason: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'users',

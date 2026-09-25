@@ -1,12 +1,15 @@
 import express from "express";
 import session from "express-session";
 import cors from "cors";
+import "dotenv/config"
 import sequelize from "./database.ts";
+import passport from "./passport.ts";
 import authRoutes from './routes/auth.ts';
 import taskRoutes from './routes/tasks.ts';
+import adminRoutes from './routes/admin.ts';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({
     origin: 'http://localhost:5173',
@@ -16,13 +19,17 @@ app.use(cors({
 app.use(express.json());
 
 app.use(session({
-    secret: 'taskhub-secret-key',
+    secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/api', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/admin', adminRoutes);
 
 async function start() {
     try {

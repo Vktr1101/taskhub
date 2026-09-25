@@ -33,7 +33,7 @@ const Task = sequelize.define('Task', {
     status: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'active'
+        defaultValue: 'undone'
     }
 }, {
     tableName: 'tasks',
