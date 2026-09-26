@@ -5,6 +5,7 @@ import Header from "../components/Header.tsx";
 import Title from "../components/Title.tsx";
 import LoginForm from "../components/LoginForm.tsx";
 import Button from "../components/Button.tsx";
+import api from "../api.ts";
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -14,22 +15,23 @@ function Login() {
     const navigate = useNavigate();
 
     async function handleLogin() {
-        const raspuns = await fetch('http://localhost:3000/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ username, password: parola })
-        });
-        const date = await raspuns.json();
+        try {
+            const raspuns = await api.post('/api/login', { username, password: parola });
+            const date = raspuns.data;
 
-        if (date.succes) {
-            setUser(date.user);
-            navigate('/profile');
-        } else if (date.banned) {
-            setBanReason(date.banReason);
-            navigate('/');
-        } else {
-            alert(date.error);
+            if (date.succes) {
+                setUser(date.user);
+                navigate('/profile');
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            const date = error.response?.data;
+            if (date?.banned) {
+                setBanReason(date.banReason);
+                navigate('/');
+            } else {
+                alert(date?.error || 'Eroare la login!');
+            }
         }
     }
 

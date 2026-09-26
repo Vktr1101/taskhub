@@ -14,7 +14,7 @@ router.get('/users', async (req, res) => {
 
     try {
         const users = await User.findAll({
-            attributes: ['id', 'username', 'admin', 'banned']
+            attributes: ['id', 'username', 'admin', 'banned', 'banReason']
         });
 
         const rezultat = [];
@@ -29,6 +29,7 @@ router.get('/users', async (req, res) => {
                 username: u.get('username'),
                 admin: u.get('admin'),
                 banned: u.get('banned'),
+                banReason: u.get('banReason'),
                 undone,
                 canceled,
                 done

@@ -11,11 +11,13 @@ interface UserContextType {
     setUser: (user: User | null) => void;
     banReason: string | null;
     setBanReason: (r: string | null) => void;
+    loading: boolean;
 }
 
 export const UserContext = createContext<UserContextType>({
     user: null,
     setUser: () => {},
     banReason: null,
-    setBanReason: () => {}
+    setBanReason: () => {},
+    loading: true
 });

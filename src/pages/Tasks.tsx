@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import Title from "../components/Title.tsx";
 import { UserContext } from "../context/UserContext.tsx";
 import TaskForm from "../components/TaskForm.tsx";
+import api from "../api.ts";
 
 interface Task {
     id: number;
@@ -24,11 +25,14 @@ function Tasks() {
     const [taskuriBifate, setTaskuriBifate] = useState<number[]>([]);
 
     async function incarcaTaskuri() {
-        const raspuns = await fetch('http://localhost:3000/api/tasks', {
-            credentials: 'include'
-        });
-        const date = await raspuns.json();
-        if (date.succes) setTaskuri(date.tasks);
+        try {
+            const raspuns = await api.get('/api/tasks');
+            const date = raspuns.data;
+            if (date.succes) setTaskuri(date.tasks);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la afisare: ' + error);
+        }
     }
 
     useEffect(() => {
@@ -103,13 +107,13 @@ function Tasks() {
     }
 
     async function aplicaActiune(statusNou: string) {
-        for (const id of taskuriBifate) {
-            await fetch(`http://localhost:3000/api/tasks/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ status: statusNou })
-            });
+        try {
+            for (const id of taskuriBifate) {
+                await api.patch(`/api/tasks/${id}`, { status: statusNou });
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la actualizare: ' + error);
         }
         setTaskuriBifate([]);
         incarcaTaskuri();
@@ -119,11 +123,13 @@ function Tasks() {
         const confirmare = window.confirm('Sigur vrei sa stergi task-urile selectate?');
         if (!confirmare) return;
 
-        for (const id of taskuriBifate) {
-            await fetch(`http://localhost:3000/api/tasks/${id}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
+        try {
+            for (const id of taskuriBifate) {
+                await api.delete(`/api/tasks/${id}`);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la stergere: ' + error);
         }
         setTaskuriBifate([]);
         incarcaTaskuri();

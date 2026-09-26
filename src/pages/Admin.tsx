@@ -2,12 +2,14 @@ import Header from "../components/Header.tsx";
 import Title from "../components/Title.tsx";
 import { UserContext } from "../context/UserContext.tsx";
 import { useState, useEffect, useContext } from "react";
+import api from "../api.ts";
 
 interface UserData {
     id: number;
     username: string;
     admin: boolean;
     banned: boolean;
+    banReason: string;
     undone: number;
     canceled: number;
     done: number;
@@ -26,23 +28,25 @@ function Admin() {
     const [banModal, setBanModal] = useState(false);
     const [userDeBanat, setUserDeBanat] = useState<number | null>(null);
     const [motivBan, setMotivBan] = useState('');
+    const [eroareBan, setEroareBan] = useState(false);
 
     async function incarcaUseri() {
-        const raspuns = await fetch('http://localhost:3000/api/admin/users', {
-            credentials: 'include'
-        });
-        const date = await raspuns.json();
-        if (date.succes) {
-            setUseri(date.users);
+        try {
+            const raspuns = await api.get('/api/admin/users');
+            const date = raspuns.data;
+            if (date.succes) {
+                setUseri(date.users);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la afisare: ' + error);
         }
     }
 
     useEffect(() => {
         async function verifica() {
-            const raspuns = await fetch('http://localhost:3000/api/me', {
-                credentials: 'include'
-            });
-            const date = await raspuns.json();
+            const raspuns = await api.get('/api/me');
+            const date = raspuns.data;
             if (date.loggedIn && date.user.admin) {
                 setUser(date.user);
             }
@@ -58,16 +62,17 @@ function Admin() {
     }, [user]);
 
     async function verificaParola() {
-        const raspuns = await fetch('http://localhost:3000/api/admin-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: parola })
-        });
-        const date = await raspuns.json();
-        if (date.succes) {
-            setDeblocat(true);
-        } else {
-            setEroare('Wrong password!');
+        try {
+            const raspuns = await api.post('/api/admin-password', {password: parola});
+            const date = raspuns.data;
+            if (date.succes) {
+                setDeblocat(true);
+            } else {
+                setEroare('Wrong password!');
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la verificare parola: ' + error);
         }
     }
 
@@ -75,30 +80,40 @@ function Admin() {
         const confirmare = window.confirm('Sigur vreti sa stergeti acest user?');
         if (!confirmare) return;
 
-        await fetch(`http://localhost:3000/api/admin/delete-user/${id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
+        try {
+            await api.delete(`/api/admin/delete-user/${id}`);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la stergere user: ' + error);
+        }
         incarcaUseri();
     }
 
     async function handleBanUser() {
-        await fetch(`http://localhost:3000/api/admin/ban/${userDeBanat}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ reason: motivBan })
-        });
+        if (motivBan.trim() === '') {
+            setEroareBan(true);
+            return;
+        }
+
+        try {
+            await api.patch(`/api/admin/ban/${userDeBanat}`, {reason: motivBan});
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la ban: ' + error);
+        }
         setBanModal(false);
         setMotivBan('');
+        setEroareBan(false);
         incarcaUseri();
     }
 
     async function handleUnbanUser(id: number) {
-        await fetch(`http://localhost:3000/api/admin/unban/${id}`, {
-            method: 'PATCH',
-            credentials: 'include'
-        });
+        try {
+            await api.patch(`/api/admin/unban/${id}`);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la unban: ' + error);
+        }
         incarcaUseri();
     }
 
@@ -118,14 +133,25 @@ function Admin() {
                             .filter(u => arataAdmini || !u.admin)
                             .map((u, i) => (
                             <div key={i} className="user-card">
+                                <p className="user-detail">Username</p>
                                 <p>{u.username} {u.admin && '(admin)'}</p>
+
                                 <p>===========================</p>
-                                <p>Tasks</p>
+                                <p className="user-detail">Tasks</p>
                                 <div className="user-stats">
                                     <span>Undone: {u.undone}</span>
                                     <span>Done: {u.done}</span>
                                     <span>Canceled: {u.canceled}</span>
                                 </div>
+
+                                {u.banned && (
+                                    <div>
+                                        <p>===========================</p>
+                                        <p className="user-detail">Ban reason</p>
+                                        <p className="ban-reason">{u.banReason}</p>
+                                    </div>
+                                )}
+
                                 <div className="user-buttons">
                                     <button onClick={() => {
                                         if (u.banned) {
@@ -171,13 +197,23 @@ function Admin() {
                         <p>Ban reason</p>
                         <input
                             type="text"
+                            className={eroareBan ? "eroare" : ''}
                             value={motivBan}
-                            onChange={(e) => setMotivBan(e.target.value)}
+                            onChange={(e) => {
+                                setMotivBan(e.target.value);
+                                setEroareBan(false);
+                            }}
                             placeholder="Reason for ban"
                         />
                         <div className="modal-buttons">
                             <button onClick={handleBanUser}>Ban</button>
-                            <button onClick={() => setBanModal(false)}>Cancel</button>
+                            <button onClick={() => {
+                                setBanModal(false);
+                                setEroareBan(false);
+                                setMotivBan('');
+                            }}>
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

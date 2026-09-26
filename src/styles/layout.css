@@ -272,6 +272,10 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.user-detail {
+    text-decoration: underline;
+}
+
 .user-stats {
     display: flex;
     justify-content: center;

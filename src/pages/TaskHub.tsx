@@ -3,16 +3,19 @@ import TaskForm from "../components/TaskForm.tsx";
 import { UserContext } from "../context/UserContext.tsx";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api.ts";
 
 function TaskHub() {
     const { setUser, banReason, setBanReason } = useContext(UserContext);
     const navigate = useNavigate();
 
     async function handleLogout() {
-        await fetch('http://localhost:3000/api/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
+        try {
+            await api.post('/api/logout');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la logout: ' + error);
+        }
         setUser(null);
         setBanReason(null);
         navigate('/');

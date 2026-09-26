@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext.tsx";
+import api from "../api.ts";
 
 interface Task {
     id?: number;
@@ -92,30 +93,32 @@ function TaskForm({ taskDeEditat, onClose }: TaskFormProps) {
         };
 
         if (taskDeEditat) {
-            const raspuns = await fetch(`http://localhost:3000/api/tasks/${taskDeEditat.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(nouTask)
-            });
-            const date = await raspuns.json();
-            if (!date.succes) {
-                setMesaj('Task wasn\'t modified!');
+            try {
+                const raspuns = await api.patch(`/api/tasks/${taskDeEditat.id}`, nouTask);
+                const date = raspuns.data;
+                if (!date.succes) {
+                    setMesaj('Task wasn\'t modified!');
+                    return;
+                }
+                if (onClose) onClose();
+                return;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                setMesaj('Error: ' + error);
                 return;
             }
-            if (onClose) onClose();
-            return;
         } else if (user) {
-            const raspuns = await fetch('http://localhost:3000/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(nouTask)
-            });
-            const date = await raspuns.json();
+            try {
+                const raspuns = await api.post('/api/tasks', nouTask);
+                const date = raspuns.data;
 
-            if (!date.succes) {
-                setMesaj('Error: Could not save task!');
+                if (!date.succes) {
+                    setMesaj('Error: Could not save task!');
+                    return;
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                setMesaj('Error: ' + error);
                 return;
             }
         } else {

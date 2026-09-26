@@ -3,6 +3,7 @@ import Header from "../components/Header.tsx";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext.tsx";
+import api from "../api.ts";
 
 function Profile() {
     const { user, setUser } = useContext(UserContext);
@@ -12,10 +13,12 @@ function Profile() {
     const [numeNou, setNumeNou] = useState('');
 
     async function handleLogout() {
-        await fetch('http://localhost:3000/api/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
+        try {
+            await api.post('/api/logout');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la logout: ' + error);
+        }
         setUser(null);
         navigate('/');
     }
@@ -24,28 +27,29 @@ function Profile() {
         const confirmare = window.confirm('Sigur vrei sa stergi contul? Actiunea este ireversibila!');
         if (!confirmare) return;
 
-        await fetch('http://localhost:3000/api/delete-account', {
-            method: 'DELETE',
-            credentials: 'include'
-        });
+        try {
+            await api.delete('/api/delete-account');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert('Eroare la stergere: ' + error);
+        }
+
         setUser(null);
         navigate('/');
     }
 
     async function handleEditUsername() {
-        const raspuns = await fetch('http://localhost:3000/api/update-username', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ username: numeNou })
-        });
-        const date = await raspuns.json();
+        try {
+            const raspuns = await api.patch('/api/update-username', { username: numeNou });
+            const date = raspuns.data;
 
-        if (date.succes) {
-            setUser({ ...user!, username: date.username });
-            setModal(false);
-        } else {
-            alert(date.error);
+            if (date.succes) {
+                setUser({...user!, username: date.username});
+                setModal(false);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            alert(error.response?.data?.error || 'Eroare la editare: ' + error);
         }
     }
 
@@ -64,6 +68,10 @@ function Profile() {
                     <span className="value-with-edit">
                         {user?.username}
                         <button className="edit-btn" onClick={() => {
+                            if (user?.admin) {
+                                alert('Nu va puteti schimba username-ul ca admin!');
+                                return;
+                            }
                             setNumeNou(user?.username || '');
                             setModal(true);
                         }}>

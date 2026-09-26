@@ -5,6 +5,7 @@ import Register from "./pages/Register.tsx";
 import Tasks from "./pages/Tasks.tsx";
 import Profile from "./pages/Profile.tsx";
 import Admin from "./pages/Admin.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 function App() {
     return (
@@ -19,8 +20,19 @@ function App() {
                 <Route path="/" element={<TaskHub />}></Route>
                 <Route path="/login" element={<Login />}></Route>
                 <Route path="/register" element={<Register />}></Route>
-                <Route path="/tasks" element={<Tasks />}></Route>
-                <Route path="/profile" element={<Profile />}></Route>
+
+                <Route path="/tasks" element={
+                    <ProtectedRoute>
+                        <Tasks />
+                    </ProtectedRoute>
+                }></Route>
+
+                <Route path="/profile" element={
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                }></Route>
+
                 <Route path="/admin" element={<Admin />}></Route>
             </Routes>
         </BrowserRouter>
