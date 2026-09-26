@@ -7,6 +7,7 @@ interface UserData {
     id: number;
     username: string;
     admin: boolean;
+    banned: boolean;
     undone: number;
     canceled: number;
     done: number;
@@ -22,6 +23,20 @@ function Admin() {
     const [useri, setUseri] = useState<UserData[]>([]);
     const [arataAdmini, setArataAdmini] = useState(false);
 
+    const [banModal, setBanModal] = useState(false);
+    const [userDeBanat, setUserDeBanat] = useState<number | null>(null);
+    const [motivBan, setMotivBan] = useState('');
+
+    async function incarcaUseri() {
+        const raspuns = await fetch('http://localhost:3000/api/admin/users', {
+            credentials: 'include'
+        });
+        const date = await raspuns.json();
+        if (date.succes) {
+            setUseri(date.users);
+        }
+    }
+
     useEffect(() => {
         async function verifica() {
             const raspuns = await fetch('http://localhost:3000/api/me', {
@@ -36,16 +51,8 @@ function Admin() {
     }, []);
 
     useEffect(() => {
-        async function incarcaUseri() {
-            const raspuns = await fetch('http://localhost:3000/api/admin/users', {
-                credentials: 'include'
-            });
-            const date = await raspuns.json();
-            if (date.succes) {
-                setUseri(date.users);
-            }
-        }
         if (user?.admin) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             incarcaUseri();
         }
     }, [user]);
@@ -62,6 +69,37 @@ function Admin() {
         } else {
             setEroare('Wrong password!');
         }
+    }
+
+    async function handleDeleteUser(id: number) {
+        const confirmare = window.confirm('Sigur vreti sa stergeti acest user?');
+        if (!confirmare) return;
+
+        await fetch(`http://localhost:3000/api/admin/delete-user/${id}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        incarcaUseri();
+    }
+
+    async function handleBanUser() {
+        await fetch(`http://localhost:3000/api/admin/ban/${userDeBanat}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ reason: motivBan })
+        });
+        setBanModal(false);
+        setMotivBan('');
+        incarcaUseri();
+    }
+
+    async function handleUnbanUser(id: number) {
+        await fetch(`http://localhost:3000/api/admin/unban/${id}`, {
+            method: 'PATCH',
+            credentials: 'include'
+        });
+        incarcaUseri();
     }
 
     return (
@@ -82,15 +120,24 @@ function Admin() {
                             <div key={i} className="user-card">
                                 <p>{u.username} {u.admin && '(admin)'}</p>
                                 <p>===========================</p>
-                                <p>Tasks:</p>
+                                <p>Tasks</p>
                                 <div className="user-stats">
                                     <span>Undone: {u.undone}</span>
                                     <span>Done: {u.done}</span>
                                     <span>Canceled: {u.canceled}</span>
                                 </div>
                                 <div className="user-buttons">
-                                    <button>Ban user</button>
-                                    <button>Delete user</button>
+                                    <button onClick={() => {
+                                        if (u.banned) {
+                                            handleUnbanUser(u.id);
+                                        } else {
+                                            setUserDeBanat(u.id);
+                                            setBanModal(true);
+                                        }
+                                    }}>
+                                        {u.banned ? 'Unban user' : 'Ban user'}
+                                    </button>
+                                    <button onClick={() => handleDeleteUser(u.id)}>Delete user</button>
                                 </div>
                             </div>
                         )).reverse()}
@@ -112,9 +159,27 @@ function Admin() {
                     <button className="button" onClick={() => {
                         window.location.href = 'http://localhost:3000/api/auth/google';
                     }}>
-                        <img src="../../public/google.png" alt=""/>
+                        <img src="/google.png" alt=""/>
                         &nbsp;Login with Google
                     </button>
+                </div>
+            )}
+
+            {banModal && (
+                <div className="modal-overlay" onClick={() => setBanModal(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <p>Ban reason</p>
+                        <input
+                            type="text"
+                            value={motivBan}
+                            onChange={(e) => setMotivBan(e.target.value)}
+                            placeholder="Reason for ban"
+                        />
+                        <div className="modal-buttons">
+                            <button onClick={handleBanUser}>Ban</button>
+                            <button onClick={() => setBanModal(false)}>Cancel</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -10,7 +10,7 @@ function Login() {
     const [username, setUsername] = useState('');
     const [parola, setParola] = useState('');
 
-    const { setUser } = useContext(UserContext);
+    const { setUser, setBanReason } = useContext(UserContext);
     const navigate = useNavigate();
 
     async function handleLogin() {
@@ -25,6 +25,9 @@ function Login() {
         if (date.succes) {
             setUser(date.user);
             navigate('/profile');
+        } else if (date.banned) {
+            setBanReason(date.banReason);
+            navigate('/');
         } else {
             alert(date.error);
         }

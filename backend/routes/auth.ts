@@ -50,6 +50,10 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ succes: false, error: 'Username sau parola gresita!' });
         }
 
+        if (user.get('banned')) {
+            return res.status(403).json({ succes: false, banned: true, banReason: user.get('banReason') });
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req.session as any).user = {
             id: user.get('id'),
@@ -64,14 +68,19 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = (req.session as any).user;
-    if (user) {
-        res.json({ loggedIn: true, user });
-    } else {
+    const sessionUser = (req.session as any).user;
+    if (!sessionUser) {
         res.json({ loggedIn: false });
     }
+
+    const user = await User.findByPk(sessionUser.id);
+    if (user && user.get('banned')) {
+        return res.json({ loggedIn: true, banned: true, banReason: user.get('banReason') });
+    }
+
+    res.json({ loggedIn: true, user: sessionUser });
 });
 
 router.post('/logout', (req, res) => {

@@ -14,7 +14,7 @@ router.get('/users', async (req, res) => {
 
     try {
         const users = await User.findAll({
-            attributes: ['id', 'username', 'admin']
+            attributes: ['id', 'username', 'admin', 'banned']
         });
 
         const rezultat = [];
@@ -28,6 +28,7 @@ router.get('/users', async (req, res) => {
                 id: userId,
                 username: u.get('username'),
                 admin: u.get('admin'),
+                banned: u.get('banned'),
                 undone,
                 canceled,
                 done
@@ -38,6 +39,66 @@ router.get('/users', async (req, res) => {
     } catch (error) {
         console.error('Eroare: ', error);
         res.status(400).json({ succes: false, error: 'Eroare la afisare admin dashboard!' });
+    }
+});
+
+router.patch('/ban/:id', async (req, res) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionUser = (req.session as any).user;
+
+    if (!sessionUser || !sessionUser.admin) {
+        return res.status(403).json({ succes: false, error: 'Acces interzis!' });
+    }
+
+    const { reason } = req.body;
+
+    try {
+        await User.update(
+            { banned: true, banReason: reason },
+            { where: { id: req.params.id } }
+        );
+        res.json({ succes: true });
+    } catch (error) {
+        console.error('Eroare: ', error);
+        res.status(400).json({ succes: false, error: 'Eroare la ban user!' });
+    }
+});
+
+router.patch('/unban/:id', async (req, res) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionUser = (req.session as any).user;
+
+    if (!sessionUser || !sessionUser.admin) {
+        return res.status(403).json({ succes: false, error: 'Acces interzis!' });
+    }
+
+    try {
+        await User.update(
+            { banned: false, banReason: null },
+            { where: { id: req.params.id } }
+        );
+        res.json({ succes: true });
+    } catch (error) {
+        console.error('Eroare: ', error);
+        res.status(400).json({ succes: false, error: 'Eroare la unban user!' });
+    }
+});
+
+router.delete('/delete-user/:id', async (req, res) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionUser = (req.session as any).user;
+
+    if (!sessionUser || !sessionUser.admin) {
+        return res.status(403).json({ succes: false, error: 'Acces interzis' });
+    }
+
+    try {
+        await Task.destroy({ where: { userId: req.params.id } });
+        await User.destroy({ where: { id: req.params.id } });
+        res.json({ succes: true });
+    } catch (error) {
+        console.error('Eroare: ', error);
+        res.status(400).json({ succes: false, error: 'Eroare la stergere user!' });
     }
 });
 

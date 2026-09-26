@@ -296,3 +296,30 @@
     text-decoration: underline;
     cursor: pointer;
 }
+
+/* ============================================================
+   BANNED USERS
+   ============================================================ */
+.banned-user {
+    display: block;
+    justify-content: center;
+    margin: 50px;
+}
+
+.banned-user img {
+    width: 300px;
+    height: 300px;
+}
+
+.banned-user h2 {
+    margin: 0;
+}
+
+.ban-reason {
+    font-size: 36px;
+    margin-top: 0;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: 2px 0 var(--text), -2px 0 var(--text), 0 2px var(--text), 0 -2px var(--text),
+        1px 1px var(--text), -1px -1px var(--text), 1px -1px var(--text), -1px 1px var(--text);
+}

@@ -13,6 +13,7 @@ interface UserProviderType {
 
 function UserProvider({ children }: UserProviderType) {
     const [user, setUser] = useState<User | null>(null);
+    const [banReason, setBanReason] = useState<string | null>(null)
 
     useEffect(() => {
         async function verificaLogin() {
@@ -20,7 +21,9 @@ function UserProvider({ children }: UserProviderType) {
                 credentials: 'include'
             });
             const date = await raspuns.json();
-            if (date.loggedIn) {
+            if (date.loggedIn && date.banned) {
+                setBanReason(date.banReason);
+            } else if (date.loggedIn) {
                 setUser(date.user);
             }
         }
@@ -28,7 +31,7 @@ function UserProvider({ children }: UserProviderType) {
     }, []);
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
+        <UserContext.Provider value={{ user, setUser, banReason, setBanReason }}>
             {children}
         </UserContext.Provider>
     );
