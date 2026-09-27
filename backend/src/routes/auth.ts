@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
-import passport from "../passport.ts";
-import User from '../models/User.ts';
-import Task from "../models/Task.ts";
+import passport from "../passport.js";
+import User from '../models/User.js';
+import Task from "../models/Task.js";
 
 const router = Router();
 

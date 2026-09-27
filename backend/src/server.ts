@@ -2,11 +2,11 @@ import express from "express";
 import session from "express-session";
 import cors from "cors";
 import "dotenv/config"
-import sequelize from "./database.ts";
-import passport from "./passport.ts";
-import authRoutes from './routes/auth.ts';
-import taskRoutes from './routes/tasks.ts';
-import adminRoutes from './routes/admin.ts';
+import sequelize from "./database.js";
+import passport from "./passport.js";
+import authRoutes from './routes/auth.js';
+import taskRoutes from './routes/tasks.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
