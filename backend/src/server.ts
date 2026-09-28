@@ -1,18 +1,20 @@
 import express from "express";
 import session from "express-session";
 import cors from "cors";
-import "dotenv/config"
+import * as dotenv from "dotenv";
 import sequelize from "./database.js";
 import passport from "./passport.js";
 import authRoutes from './routes/auth.js';
 import taskRoutes from './routes/tasks.js';
 import adminRoutes from './routes/admin.js';
 
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:4173'], // PT DEV SI PT BUILD
     credentials: true
 }));
 

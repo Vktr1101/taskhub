@@ -13,6 +13,7 @@ A full-stack task management web application with user accounts, an admin dashbo
 
 **Backend**
 - Node.js + Express + TypeScript
+- tsx (runs TypeScript in development)
 - Sequelize (ORM)
 - Passport + passport-google-oauth20 (Google OAuth)
 - express-session (session management)
@@ -45,6 +46,7 @@ A full-stack task management web application with user accounts, an admin dashbo
 - Edit username through a modal
 - Logout
 - Delete account (removes the user and all their tasks)
+- Light / dark theme toggle that persists across sessions (localStorage)
 
 ### Admin dashboard
 - Accessed at `/admin` behind a password gate; entering the correct admin password reveals a **Login with Google** button
@@ -59,27 +61,34 @@ A full-stack task management web application with user accounts, an admin dashbo
 
 ```
 taskhub/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/   # reusable components (Header, TaskForm, Button, ...)
+│   │   ├── context/      # UserContext + UserProvider
+│   │   ├── pages/        # page components (TaskHub, Tasks, Profile, Login, Register, Admin)
+│   │   ├── styles/       # CSS (index.css, layout.css, tasks.css)
+│   │   └── api.ts        # centralized axios instance
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.ts
 ├── backend/
-│   ├── models/          # Sequelize models (User, Task)
-│   ├── routes/          # Express routers (auth, tasks, admin)
-│   ├── database.ts      # Sequelize connection
-│   ├── passport.ts      # Google OAuth strategy
-│   ├── server.ts        # Express app entry point
-│   ├── .env             # secrets (NOT committed)
-│   └── env-example.txt  # template for .env
-├── public/
-├── src/
-│   ├── components/      # reusable components (Header, TaskForm, Button, ...)
-│   ├── context/         # UserContext + UserProvider
-│   ├── pages/           # page components (TaskHub, Tasks, Profile, Login, Register, Admin)
-│   ├── styles/          # CSS (index.css, layout.css, tasks.css)
-│   └── api.ts           # centralized axios instance
-└── index.html
+│   ├── src/
+│   │   ├── models/       # Sequelize models (User, Task)
+│   │   ├── routes/       # Express routers (auth, tasks, admin)
+│   │   ├── database.ts   # Sequelize connection
+│   │   ├── passport.ts   # Google OAuth strategy
+│   │   └── server.ts     # Express app entry point
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env              # secrets (NOT committed)
+│   └── env-example.txt   # template for .env
+└── README.md
 ```
 
 ## Prerequisites
 
-- Node.js (v22+ recommended, so TypeScript files run directly)
+- Node.js (v18+)
 - Docker (for the MySQL database)
 - A Google Cloud project with OAuth credentials (for admin login)
 
@@ -97,7 +106,7 @@ cd taskhub
 Create and run a MySQL container:
 
 ```
-docker run --name taskhub-mysql -e MYSQL_ROOT_PASSWORD=taskhub123 -p 3307:3306 -d mysql
+docker run --name taskhub-mysql -e MYSQL_ROOT_PASSWORD=taskhub123 -p 3306:3306 -d mysql
 ```
 
 To start/stop it later:
@@ -157,9 +166,9 @@ DB_HOST=localhost
 DB_PORT=3306
 SESSION_SECRET=your-session-secret
 PORT=3000
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+GOOGLE_CALLBACK_URL="http://localhost:3000/api/auth/google/callback"
 ADMIN_PASSWORD=your-admin-password
 ```
 
@@ -180,29 +189,67 @@ cd backend
 npm install
 ```
 
-Frontend (from the project root):
+Frontend:
 
 ```
-cd ..
+cd frontend
 npm install
 ```
 
-### 6. Run the app
+## Running the App
 
-Start the backend (from `backend/`, with the MySQL container running):
+The app has separate scripts for development and production. Frontend commands run from the `frontend/` folder, backend commands from the `backend/` folder.
 
-```
-node server.ts
-```
+### Development
 
-Start the frontend (from the project root, in a separate terminal):
+Run both with live reload while you work.
+
+Backend (from `backend/`, with the MySQL container running):
 
 ```
 npm run dev
 ```
+Runs `tsx watch src/server.ts` — executes the TypeScript directly and restarts automatically on every change.
+
+Frontend (from `frontend/`, in a separate terminal):
+
+```
+npm run dev
+```
+Starts the Vite dev server with hot module replacement.
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3000
+
+### Production build
+
+**Backend** (from `backend/`) — compile TypeScript to JavaScript, then run the compiled output:
+
+```
+npm run build     # tsc compiles src/ into dist/
+npm start         # node dist/server.js
+```
+
+**Frontend** (from `frontend/`) — build the optimized static files, then preview them locally:
+
+```
+npm run build     # outputs the production bundle to dist/
+npm run preview   # serves the built app (http://localhost:4173)
+```
+
+> After changing backend code, re-run `npm run build` before `npm start`, since `npm start` runs the already-compiled `dist/` folder rather than the source.
+
+## npm Scripts Reference
+
+**Backend** (run from `backend/`)
+- `npm run dev` — run the server in development with tsx and auto-restart
+- `npm run build` — compile TypeScript (`src/`) to JavaScript (`dist/`)
+- `npm start` — run the compiled server (`node dist/server.js`)
+
+**Frontend** (run from `frontend/`)
+- `npm run dev` — start the Vite dev server (development)
+- `npm run build` — produce the optimized production bundle (`dist/`)
+- `npm run preview` — locally preview the production build
 
 ## API Overview
 
@@ -231,4 +278,4 @@ npm run dev
 ## Notes
 
 - The MySQL data lives inside the Docker container; stopping the container keeps the data, but removing (`docker rm`) it deletes the data.
-- Because the backend runs TypeScript directly with `node`, restart the server after any backend change.
+- In development the backend runs with `tsx watch`, so it restarts automatically on code changes. In production it runs the compiled `dist/` output, which must be rebuilt after any backend change.

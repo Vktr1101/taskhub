@@ -141,7 +141,8 @@ router.get('/auth/google', passport.authenticate('google', {
 
 router.get('/auth/google/callback',
     passport.authenticate('google', {
-        failureRedirect: 'http://localhost:5173/admin',
+        // failureRedirect: 'http://localhost:5173/admin', // DEV
+        failureRedirect: 'http://localhost:4173/admin', // BUILD
         // session: true
     }),
     (req, res) => {
@@ -155,7 +156,8 @@ router.get('/auth/google/callback',
             email: user.email,
             admin: user.admin
         };
-        res.redirect('http://localhost:5173/admin');
+        // res.redirect('http://localhost:5173/admin'); // DEV
+        res.redirect('http://localhost:4173/admin'); // BUILD
     }
 );
 
